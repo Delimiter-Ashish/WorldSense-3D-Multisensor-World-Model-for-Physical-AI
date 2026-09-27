@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldsense3d"
+version = "0.1.0"
+description = "Multisensor world model for physical AI with RGB, depth, segmentation, state and action fusion."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Ashish S. Joshi"}]
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.1",
+  "PyYAML>=6.0",
+  "tqdm>=4.66",
+  "Pillow>=10.0",
+  "pybullet>=3.2.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
