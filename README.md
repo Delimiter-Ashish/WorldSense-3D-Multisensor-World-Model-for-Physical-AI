@@ -1,36 +1,37 @@
 # WorldSense-3D
 
-**Intervention-aware multisensor world modeling for counterfactual Physical AI.**
+### Intervention-Aware Multisensor World Modeling for Counterfactual Physical AI
 
-WorldSense-3D is an object-centric physical reasoning system that predicts how a 3D scene evolves under **factual and counterfactual physical interventions**.
+WorldSense-3D is a research-oriented physical world model for predicting how 3D scenes evolve under **factual and counterfactual interventions**.
 
-The system combines controlled PyBullet simulation with RGB, depth, segmentation, structured physical state, action information, and intervention conditioning to study a central Physical AI question:
+Given the same initial physical scene, the system models alternative futures produced by changes in **force, mass, friction, or action execution**. It combines PyBullet simulation, structured object state, RGB, depth, segmentation, intervention conditioning, and object-token transformers for future 3D trajectory forecasting.
 
-> **If we change an action or physical property, can a learned world model predict how the future changes?**
-
----
-
-## Highlights
-
-- Paired **factual / counterfactual** physical simulations
-- RGB + metric depth + segmentation + structured object state
-- Future 3D trajectory prediction for every object
-- Counterfactual interventions over:
-  - force
-  - mass
-  - friction
-  - action cancellation
-- Target-aware object conditioning
-- Intervention-effect evaluation
-- Modality and intervention ablations
-- 5,000-pair counterfactual benchmark
-- Reproducible training and evaluation pipeline
+> **Core question:**  
+> If an action or physical property changes, can a learned world model predict how the future changes?
 
 ---
 
-## Counterfactual World Modeling
+## Overview
 
-For the same initial physical scene, WorldSense-3D creates two possible futures:
+WorldSense-3D provides an end-to-end pipeline for:
+
+- paired factual / counterfactual simulation
+- RGB, depth, segmentation, and structured state sensing
+- object-level future 3D trajectory prediction
+- intervention-conditioned world modeling
+- target-object reasoning
+- counterfactual effect measurement
+- modality ablations
+- intervention-specific failure analysis
+- reproducible training and evaluation
+
+The current release contains a **5,000-pair counterfactual benchmark** with four intervention families.
+
+---
+
+## Counterfactual Physical Reasoning
+
+For every sampled scene, WorldSense-3D can generate two futures from the same starting world:
 
 ```text
                      SAME INITIAL WORLD
@@ -46,44 +47,113 @@ For the same initial physical scene, WorldSense-3D creates two possible futures:
                 │                       │
                 └───────────┬───────────┘
                             ▼
-                Counterfactual effect
+                  Counterfactual Effect
+```
+
+Supported counterfactual interventions:
+
+| Intervention | Example |
+|---|---|
+| Force | weaker or stronger push |
+| Mass | lighter or heavier target object |
+| Friction | lower or higher target friction |
+| Action cancellation | intended push does not occur |
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart LR
+    A[Initial Physical Scene]
+
+    A --> B[RGB Sequence]
+    A --> C[Depth Sequence]
+    A --> D[Structured Object State]
+    A --> E[Target Object]
+
+    F[Physical Intervention] --> G[Intervention Encoder]
+
+    B --> H[Temporal RGB Encoder]
+    C --> I[Temporal Depth Encoder]
+
+    H --> J[Visual Context]
+    I --> J
+
+    E --> K[Target-Aware Features]
+
+    D --> L[Object State Encoder]
+
+    J --> M[Multimodal Fusion]
+    K --> M
+    G --> M
+
+    L --> N[Object Tokens]
+    M --> N
+
+    N --> O[Object-Token Transformer]
+    O --> P[Future 3D Trajectories]
+
+    P --> Q[Counterfactual Metrics]
+```
+
+The architecture is intentionally modular so different sensor combinations can be evaluated independently.
+
+---
+
 ## v0.2 Counterfactual Benchmark
 
-WorldSense-3D v0.2 evaluates counterfactual physical reasoning on 5,000 paired factual/counterfactual scenes.
+The v0.2 benchmark contains:
 
-- 4,000 training pairs
-- 500 validation pairs
-- 500 test pairs
-- 3-5 rigid objects per scene
-- 4 context frames
-- 5 future prediction frames
-- Force, mass, friction, and action-cancellation interventions
+- **5,000 paired factual/counterfactual scenes**
+- **4,000 training pairs**
+- **500 validation pairs**
+- **500 test pairs**
+- **3–5 rigid objects per scene**
+- **4 context frames**
+- **5 future prediction frames**
+- randomized object mass, friction, restitution, and force
+- four counterfactual intervention families
 
-### Ablation Results
+---
+
+## Main Results
 
 | Model | ADE ↓ | FDE ↓ | Target ADE ↓ | Target FDE ↓ | Shift MAE ↓ | Final Shift MAE ↓ |
 |---|---:|---:|---:|---:|---:|---:|
 | **State + Intervention** | **0.0361** | **0.0644** | **0.0878** | **0.1685** | **0.0588** | **0.1136** |
-| Global Visual | 0.0392 | 0.0713 | 0.0994 | 0.1912 | 0.0722 | 0.1388 |
+| Global Visual + State + Intervention | 0.0392 | 0.0713 | 0.0994 | 0.1912 | 0.0722 | 0.1388 |
 | Target-Aware Multimodal | 0.0399 | 0.0750 | 0.0991 | 0.1925 | 0.0693 | 0.1330 |
-| No Intervention | 0.0848 | 0.1483 | 0.2898 | 0.5038 | 0.1495 | 0.2527 |
+| No Intervention Conditioning | 0.0848 | 0.1483 | 0.2898 | 0.5038 | 0.1495 | 0.2527 |
 
-## Main Findings
+### Key Findings
 
-Explicit intervention conditioning substantially improves counterfactual forecasting.
+**1. Explicit intervention conditioning is critical.**
 
-Compared with the no-intervention model, the strongest intervention-aware model reduces:
+Compared with the no-intervention model, the strongest intervention-aware configuration reduces:
 
-- Target ADE by approximately **69.7%**
-- Counterfactual shift MAE by approximately **60.7%**
+- **Target ADE by ~69.7%**
+- **Counterfactual Shift MAE by ~60.7%**
 
-Structured state + intervention conditioning achieves the strongest result in the current simulator.
+**2. Structured physical state is extremely strong in this simulator.**
 
-RGB and depth do not outperform privileged structured physical state in the current setup. This motivates future experiments where state information is incomplete, noisy, or must be inferred directly from perception.
+State + intervention conditioning achieves the strongest overall benchmark performance.
 
-Mass interventions are the hardest tested intervention, while action cancellation is the easiest.
+**3. RGB and depth do not outperform privileged structured state in the current setting.**
 
-## Benchmark Figures
+This is an important negative result rather than something hidden by the benchmark. When precise object position, orientation, velocity, and intervention information are already available, visual sensing is largely redundant under the current synthetic setup.
+
+This motivates a harder next-stage problem:
+
+> Can visual perception recover physical information when structured state is incomplete, noisy, or unavailable?
+
+**4. Mass interventions are the hardest tested counterfactual family.**
+
+Changes to latent physical properties such as mass are substantially harder than action cancellation.
+
+---
+
+## Benchmark Visualizations
 
 ### Counterfactual Target Prediction
 
@@ -97,103 +167,266 @@ Mass interventions are the hardest tested intervention, while action cancellatio
 
 ![Intervention Breakdown](docs/figures/v02_intervention_breakdown.png)
 
+Detailed benchmark analysis is available in:
+
+[`docs/V0.2_RESULTS.md`](docs/V0.2_RESULTS.md)
+
+---
+
 ## Qualitative Counterfactual Futures
+
+WorldSense-3D also generates matched qualitative examples where the initial world is unchanged but one physical intervention is modified.
 
 ![Counterfactual Overview](docs/figures/counterfactual_examples/counterfactual_overview.png)
 
-Additional factual-vs-counterfactual animations and trajectory plots are available in:
+Additional trajectory plots and factual-vs-counterfactual animations are available under:
 
-docs/figures/counterfactual_examples/
+[`docs/figures/counterfactual_examples/`](docs/figures/counterfactual_examples/)
+
+---
 
 ## Metrics
 
-- **ADE** - average 3D displacement error over future frames
-- **FDE** - final-frame 3D displacement error
-- **Target ADE/FDE** - trajectory error for the intervened object
-- **Shift MAE** - error in the magnitude of intervention-induced trajectory change
-- **Final Shift MAE** - intervention-effect error at the final prediction frame
+### ADE — Average Displacement Error
 
-## Dataset Contents
+Average 3D trajectory error across all predicted future frames.
 
-Each counterfactual pair contains:
+### FDE — Final Displacement Error
+
+3D trajectory error at the final prediction frame.
+
+### Target ADE / FDE
+
+ADE and FDE computed specifically for the directly intervened object.
+
+### Shift MAE
+
+Error in the predicted magnitude of the trajectory change caused by the counterfactual intervention.
+
+### Final Shift MAE
+
+Counterfactual effect error at the final prediction frame.
+
+---
+
+## Dataset Structure
+
+Each factual/counterfactual pair contains:
 
 - RGB sequence
 - metric depth sequence
 - semantic segmentation
 - structured object states
-- object validity mask
+- object-validity mask
 - target object index
-- factual and counterfactual actions
-- target mass and friction
+- factual action
+- counterfactual action
+- target mass
+- target friction
 - effective force
-- intervention type and scale
+- intervention type
+- intervention scale
 - factual future trajectories
 - counterfactual future trajectories
 
-Structured object state includes 3D position, quaternion orientation, linear velocity, and angular velocity.
+Structured object state includes:
+
+```text
+3D position
+orientation quaternion
+linear velocity
+angular velocity
+```
+
+---
 
 ## Quick Start
 
-Clone the repository:
+### 1. Clone
 
-    git clone git@github.com:Delimiter-Ashish/WorldSense-3D-Multisensor-World-Model-for-Physical-AI.git
-    cd WorldSense-3D-Multisensor-World-Model-for-Physical-AI
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -e ".[dev]"
+```bash
+git clone https://github.com/Delimiter-Ashish/WorldSense-3D-Multisensor-World-Model-for-Physical-AI.git
+cd WorldSense-3D-Multisensor-World-Model-for-Physical-AI
+```
 
-Generate counterfactual data:
+### 2. Create environment
 
-    python scripts/generate_counterfactual_dataset.py --config configs/counterfactual.yaml --pairs 5000
+```bash
+python -m venv .venv
+source .venv/bin/activate
 
-Train:
+pip install -e ".[dev]"
+```
 
-    python scripts/train_counterfactual.py --config configs/counterfactual_5000.yaml
+### 3. Run tests
 
-Evaluate:
+```bash
+pytest -q
+```
 
-    python scripts/evaluate_counterfactual.py --checkpoint outputs/counterfactual_5000/best.pt --split test
+### 4. Generate counterfactual data
 
-Run tests:
+```bash
+python scripts/generate_counterfactual_dataset.py \
+    --config configs/counterfactual.yaml \
+    --pairs 5000
+```
 
-    pytest -q
+### 5. Train the counterfactual world model
+
+```bash
+python scripts/train_counterfactual.py \
+    --config configs/counterfactual_5000.yaml
+```
+
+### 6. Evaluate
+
+```bash
+python scripts/evaluate_counterfactual.py \
+    --checkpoint outputs/counterfactual_5000/best.pt \
+    --split test \
+    --batch-size 128
+```
+
+---
 
 ## Repository Structure
 
-- `configs/` - experiment configurations
-- `src/worldsense3d/sim/` - factual and counterfactual PyBullet simulation
-- `src/worldsense3d/data/` - dataset loaders
-- `src/worldsense3d/models/` - world-model architectures
-- `scripts/` - generation, training, evaluation, and visualization
-- `docs/` - benchmark reports and figures
-- `results/` - recorded benchmark summaries
-- `tests/` - regression and shape tests
+```text
+WorldSense-3D/
+│
+├── configs/
+│   ├── base.yaml
+│   ├── counterfactual.yaml
+│   ├── counterfactual_5000.yaml
+│   └── ablation configurations
+│
+├── src/worldsense3d/
+│   ├── sim/
+│   │   ├── generator.py
+│   │   └── counterfactual.py
+│   │
+│   ├── data/
+│   │   ├── dataset.py
+│   │   └── counterfactual_dataset.py
+│   │
+│   ├── models/
+│   │   ├── encoders.py
+│   │   ├── world_model.py
+│   │   └── counterfactual_world_model.py
+│   │
+│   ├── train.py
+│   ├── train_counterfactual.py
+│   ├── evaluate.py
+│   └── metrics.py
+│
+├── scripts/
+│   ├── generate_dataset.py
+│   ├── generate_counterfactual_dataset.py
+│   ├── train_counterfactual.py
+│   ├── evaluate_counterfactual.py
+│   └── visualization scripts
+│
+├── results/
+│   ├── v0.1_results.json
+│   └── v0.2_ablation_results.json
+│
+├── docs/
+│   ├── EXPERIMENTS.md
+│   ├── V0.2_RESULTS.md
+│   ├── ROADMAP.md
+│   └── figures/
+│
+├── tests/
+├── slurm/
+├── requirements.txt
+├── pyproject.toml
+└── README.md
+```
+
+---
 
 ## Research Questions
 
-1. Can world models predict alternative physical futures?
+WorldSense-3D is designed to study:
+
+1. Can learned world models predict alternative physical futures?
 2. How important is explicit intervention conditioning?
-3. Which physical interventions are hardest to model?
-4. When does vision add information beyond privileged state?
-5. Can physical properties be inferred directly from perception?
-6. How robust are world models to missing or corrupted sensors?
+3. Which physical properties are hardest to reason about counterfactually?
+4. When does visual sensing provide information beyond structured state?
+5. Can hidden physical properties be inferred directly from perception?
+6. How robust are predictions to missing or corrupted sensors?
+7. Can a VLM use a learned physical dynamics model as a reasoning tool?
 
-## Future Directions
+---
 
-- vision-only and partial-state world modeling
-- hidden physical-property inference
-- object-centric visual representations
-- collision and contact prediction
-- sensor corruption benchmarks
-- uncertainty-aware future prediction
-- VLM/world-model integration
+## Current Limitations
+
+The current benchmark intentionally uses a controlled synthetic environment.
+
+Important limitations include:
+
+- PyBullet-only simulation
+- small numbers of rigid objects
+- privileged structured object state
+- limited visual diversity
+- fixed camera configuration
+- no real-world sensor noise
+- no language-conditioned reasoning yet
+- no embodied planning loop
+
+These limitations define the next research direction rather than being hidden by the evaluation.
+
+---
+
+## Future Work
+
+Planned extensions include:
+
+- vision-only physical forecasting
+- partial and noisy state estimation
+- hidden mass/friction inference
+- object-centric visual representation learning
+- contact and collision prediction
+- uncertainty-aware trajectory forecasting
+- sensor dropout and corruption benchmarks
+- natural-language physical reasoning
+- VLM + world-model integration
 - embodied-agent planning
+- transfer from synthetic physics to real video
+
+---
 
 ## Reproducibility
 
-Generated datasets, virtual environments, checkpoints, and raw training outputs are excluded from Git.
+Benchmark numbers reported in this repository are tied to checked-in experiment configurations and recorded result files.
 
-Tracked artifacts include source code, configurations, benchmark summaries, figures, tests, and documentation.
+Large generated artifacts are intentionally excluded from Git:
+
+- simulation datasets
+- model checkpoints
+- virtual environments
+- raw training outputs
+
+Tracked artifacts include:
+
+- source code
+- experiment configurations
+- benchmark summaries
+- tests
+- analysis scripts
+- figures
+- documentation
+
+---
+
+## Version
+
+Current research release:
+
+**WorldSense-3D v0.2.0 — Counterfactual Physical World Modeling**
+
+---
 
 ## License
 
