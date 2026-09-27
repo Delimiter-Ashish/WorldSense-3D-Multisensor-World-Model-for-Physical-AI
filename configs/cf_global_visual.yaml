@@ -1,0 +1,36 @@
+seed: 7
+data:
+  root: data/worldsense3d-cf-v0.2-full
+  train_split: train
+  val_split: val
+  test_split: test
+  context_frames: 4
+  future_frames: 5
+  depth_clip_m: 5.0
+model:
+  hidden_dim: 192
+  visual_dim: 128
+  temporal_layers: 2
+  scene_layers: 3
+  num_heads: 6
+  dropout: 0.1
+  state_dim: 14
+  action_dim: 17
+  max_objects: 5
+  future_frames: 5
+  modalities:
+  - rgb
+  - depth
+  - state
+  - action
+training:
+  batch_size: 128
+  epochs: 20
+  lr: 0.0003
+  weight_decay: 0.0001
+  num_workers: 4
+  grad_clip: 1.0
+  target_weight: 4.0
+  amp: true
+  device: auto
+  output_dir: outputs/cf_global_visual
