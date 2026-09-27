@@ -14,7 +14,7 @@ build/
 wandb/
 runs/
 outputs/
-data/
+/data/
 checkpoints/
 *.pt
 *.pth
