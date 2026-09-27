@@ -1,0 +1,18 @@
+{
+  "dataset_5000": {
+    "full_multimodal": {
+      "modalities": ["rgb", "depth", "state", "action"],
+      "ade": 0.10994937354326248,
+      "fde": 0.17137724041938782,
+      "target_ade": 0.3387587842941284,
+      "target_fde": 0.5740924386978149
+    },
+    "state_action": {
+      "modalities": ["state", "action"],
+      "ade": 0.11972455781698227,
+      "fde": 0.20489084684848785,
+      "target_ade": 0.2672849109172821,
+      "target_fde": 0.4631565637588501
+    }
+  }
+}
