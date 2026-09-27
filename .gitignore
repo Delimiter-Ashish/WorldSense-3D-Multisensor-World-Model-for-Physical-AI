@@ -21,3 +21,5 @@ checkpoints/
 *.ckpt
 .DS_Store
 worldsense3D/
+*.log
+*.pid

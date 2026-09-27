@@ -1,0 +1,32 @@
+seed: 7
+
+data:
+  root: data/worldsense3d-cf-v0.2
+  train_split: train
+  val_split: val
+  test_split: test
+  context_frames: 4
+  future_frames: 5
+  max_objects: 5
+  image_size: 128
+  depth_clip_m: 5.0
+
+simulation:
+  pairs: 5000
+  train_fraction: 0.8
+  val_fraction: 0.1
+  min_objects: 3
+  max_objects: 5
+  frames: 9
+  context_frames: 4
+  frame_stride: 30
+  physics_hz: 240
+  image_size: 128
+  camera_distance: 3.0
+  camera_yaw: 45.0
+  camera_pitch: -50.0
+  near: 0.05
+  far: 5.0
+  force_min: 4.0
+  force_max: 12.0
+  force_duration_steps: 45
