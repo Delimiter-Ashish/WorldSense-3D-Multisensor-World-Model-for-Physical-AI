@@ -1,0 +1,54 @@
+data:
+  context_frames: 4
+  depth_clip_m: 5.0
+  future_frames: 5
+  image_size: 128
+  max_objects: 5
+  root: data/worldsense3d-v0
+  test_split: test
+  train_split: train
+  val_split: val
+model:
+  action_dim: 6
+  dropout: 0.1
+  future_frames: 5
+  hidden_dim: 192
+  max_objects: 5
+  modalities:
+  - state
+  - action
+  num_heads: 6
+  scene_layers: 3
+  state_dim: 13
+  temporal_layers: 2
+  visual_dim: 128
+seed: 7
+simulation:
+  camera_distance: 3.0
+  camera_pitch: -50.0
+  camera_yaw: 45.0
+  context_frames: 4
+  episodes: 1000
+  far: 5.0
+  force_duration_steps: 45
+  force_max: 12.0
+  force_min: 4.0
+  frame_stride: 30
+  frames: 9
+  image_size: 128
+  max_objects: 5
+  min_objects: 3
+  near: 0.05
+  physics_hz: 240
+  train_fraction: 0.8
+  val_fraction: 0.1
+training:
+  amp: true
+  batch_size: 128
+  device: auto
+  epochs: 15
+  grad_clip: 1.0
+  lr: 0.0003
+  num_workers: 8
+  output_dir: outputs/final_state_action_5000
+  weight_decay: 0.0001

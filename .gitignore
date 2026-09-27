@@ -20,3 +20,4 @@ checkpoints/
 *.pth
 *.ckpt
 .DS_Store
+worldsense3D/
