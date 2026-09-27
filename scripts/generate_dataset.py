@@ -19,7 +19,8 @@ def main() -> None:
 
     cfg = load_yaml(args.config)
     sim_cfg = dict(cfg["simulation"])
-    episodes = int(args.episodes or sim_cfg.pop("episodes"))
+    default_episodes = int(sim_cfg.pop("episodes"))
+    episodes = int(args.episodes if args.episodes is not None else default_episodes)
     train_fraction = float(sim_cfg.pop("train_fraction"))
     val_fraction = float(sim_cfg.pop("val_fraction"))
     out = Path(args.output or cfg["data"]["root"])
